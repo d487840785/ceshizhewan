@@ -1,8 +1,5 @@
 name: 打包Python程序为exe
 
-
-
-
 on:
   push:
     branches: [ main, master ]
