@@ -1,110 +1,91 @@
+import tkinter as tk
+import random
 import threading
 import time
-import random
-import math
-import tkinter as tk
-from tkinter import ttk
+import sys
 
-# 屏幕尺寸
-SCREEN_W, SCREEN_H = 0, 0
-
-try:
-    root = tk.Tk()
-    root.withdraw()
-    SCREEN_W = root.winfo_screenwidth()
-    SCREEN_H = root.winfo_screenheight()
-    root.destroy()
-except:
-    # 若获取失败，使用默认值
-    SCREEN_W, SCREEN_H = 1920, 1080
-
-# 窗口大小
-WINDOW_W, WINDOW_H = 120, 60
-desired_points = 100  # 心形点数，可调整
-
-
-def generate_heart_points(num_points, screen_w, screen_h, window_w, window_h):
-    """生成心形分布的坐标点"""
-    points = []
-    center_x = screen_w // 2
-    center_y = screen_h // 2
+def show_warn_tip():
+    """创建并显示随机位置的提示窗口"""
+    # 创建窗口
+    window = tk.Tk()
     
-    for i in range(num_points):
-        t = i / num_points * 2 * 3.14159
-        # 心形参数方程
-        x = 16 * (pow(math.sin(t), 3))
-        y = 13 * math.cos(t) - 5 * math.cos(2*t) - 2 * math.cos(3*t) - math.cos(4*t)
-        
-        # 缩放和平移
-        scale = min(screen_w // 40, screen_h // 40)
-        x = center_x + x * scale
-        y = center_y - y * scale  # y轴反转
-        
-        # 确保窗口在屏幕内
-        x = max(window_w // 2, min(x, screen_w - window_w // 2))
-        y = max(window_h // 2, min(y, screen_h - window_h // 2))
-        
-        points.append((int(x), int(y)))
+    # 获取屏幕尺寸（确保在窗口创建后获取）
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
     
-    return points
-
-
-# 显示提示窗口的函数
-def show_warn_tip(x, y, w, h):
-    """在指定位置显示提示窗口"""
-    root = tk.Tk()
-    root.overrideredirect(True)
-    root.geometry(f"{w}x{h}+{x-w//2}+{y-h//2}")
-    root.attributes('-topmost', True)
+    # 窗口尺寸
+    window_width = 250
+    window_height = 60
     
-    # 随机颜色
-    r = random.randint(200, 255)
-    g = random.randint(200, 255)
-    b = random.randint(200, 255)
-    root.configure(bg=f'#{r:02x}{g:02x}{b:02x}')
+    # 随机位置（确保窗口在屏幕内）
+    x = random.randrange(0, screen_width - window_width)
+    y = random.randrange(0, screen_height - window_height)
     
-    # 随机提示语
+    # 设置窗口位置和标题
+    window.title("温馨提示")
+    window.geometry(f"{window_width}x{window_height}+{x}+{y}")
+    
+    # 提示语列表（已添加新内容）
     tips = [
-        "保持好心情", "我想你了", "保持微笑",
-        "希望你天天都要元气满满", "别熬夜",
-        "记得吃水果", "好好吃饭", "多喝水",
-        "每天都要开心", "保持你的纯真",
-        "你的微笑很特别", "要一直幸福哦",
-        "想你的每一天", "照顾好自己", "记得想我"
+        "多喝水啊", "保持微笑",
+        "每天快乐呀", 
+        "记得吃水果", "保持好心情",
+        "好好爱自己", "我想你了",
+        "多想我呀", "想住进你心里",
+        "一辈子都守护你", 
+        "相信美好会关注到你哦",
+        "天冷了，多穿衣服"
     ]
     
     tip = random.choice(tips)
-    label = ttk.Label(
-        root, 
-        text=tip, 
-        font=('微软雅黑', 10), 
-        background=f'#{r:02x}{g:02x}{b:02x}'
-    )
-    label.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
     
-    # 使窗口可关闭
-    def close():
-        root.destroy()
+    # 随机背景颜色（淡色系）
+    bg_colors = [
+        'lightpink', 'skyblue',
+        'lightgreen', 'lavender',
+        'lightyellow', 'plum', 'coral',
+        'bisque', 'aquamarine',
+        'mistyrose', 'honeydew',
+        'lavenderblush', 'oldlace'
+    ]
     
-    root.bind('<Button-1>', lambda e: close())
-    root.after(5000, close)  # 5秒后自动关闭，可调整
-    root.mainloop()
+    bg = random.choice(bg_colors)
+    
+    # 创建标签显示文字
+    tk.Label(
+        window,
+        text=tip,
+        bg=bg,
+        font=('微软雅黑', 16),
+        width=20,
+        height=3
+    ).pack()
+    
+    # 窗口置顶显示
+    window.attributes('-topmost', True)
+    
+    # 绑定关闭事件，触发时退出所有窗口
+    def on_space(event):
+        window.destroy()
+        # 遍历所有线程，关闭所有tkinter窗口
+        for t in threads:
+            if t.is_alive():
+                # tkinter窗口关闭后线程自然结束
+                pass
+        sys.exit()  # 退出程序
+    
+    window.bind('<space>', on_space)
+    
+    # 主循环显示窗口
+    window.mainloop()
 
 
-if __name__ == "__main__":
-    points = generate_heart_points(desired_points, SCREEN_W, SCREEN_H, WINDOW_W, WINDOW_H)
-    threads = []
-    
-    for (x, y) in points:
-        t = threading.Thread(target=show_warn_tip, args=(x, y, WINDOW_W, WINDOW_H))
-        threads.append(t)
-        t.start()
-        time.sleep(0.12)  # 放慢节奏，确保能看清文字
-    
-    # 所有弹窗都已创建，等待一段时间供阅读后统一关闭
-    hold_seconds = 12  # 可调: 全部出现后再停留的秒数
-    time.sleep(hold_seconds)
-    
-    # 此处简化，等待窗口自动关闭
-    # 因tkinter窗口是独立线程，若要主动关闭所有窗口，
-    # 可通过修改show_warn_tip的关闭逻辑实现批量关闭
+# 创建线程列表
+threads = []
+
+# 窗口数量（根据屏幕尺寸大小可调整）
+for i in range(300):
+    t = threading.Thread(target=show_warn_tip)
+    threads.append(t)
+    t.start()
+    time.sleep(0.05)  # 快速连续出现窗口
