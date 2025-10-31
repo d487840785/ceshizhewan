@@ -22,7 +22,7 @@ def show_warn_tip():
     y = random.randrange(0, screen_height - window_height)
     
     # 设置窗口位置和标题
-    window.title("温馨提示")
+    window.title("小雨宝宝")
     window.geometry(f"{window_width}x{window_height}+{x}+{y}")
     
     # 提示语列表（已添加新内容）
@@ -34,7 +34,7 @@ def show_warn_tip():
         "多想我呀", "想住进你心里",
         "一辈子都守护你", 
         "相信美好会关注到你哦",
-        "天冷了，多穿衣服"
+        "天冷了，多穿衣服","屁燕子不许疼"
     ]
     
     tip = random.choice(tips)
@@ -84,8 +84,9 @@ def show_warn_tip():
 threads = []
 
 # 窗口数量（根据屏幕尺寸大小可调整）
-for i in range(300):
+for i in range(66):
     t = threading.Thread(target=show_warn_tip)
     threads.append(t)
     t.start()
-    time.sleep(0.05)  # 快速连续出现窗口
+    time.sleep(0.1)  # 快速连续出现窗口
+
